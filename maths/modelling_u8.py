@@ -62,19 +62,58 @@ def draw_graph(t, y):
 
 def generate_plotly(t, ys, image_name, title):
     data = []
+    annotations = []
     for label, y in ys:
         trace = go.Scatter(
             x=t,
             y=y,
-            mode='lines',
+            mode="lines",
+            line=dict(color="rgba(67,67,67,1)"),
             name=label
         )
         data.append(trace)
+    data.append(
+        go.Scatter(
+            x=[0, 13.25],
+            y=[0.25, 0.25],
+            mode="lines",
+            line=dict(color="rgba(67,67,67,1)", dash=5, width=1)
+        )
+    )
+    data.append(
+        go.Scatter(
+            x=[13.25, 13.25],
+            y=[0, 0.25],
+            mode="lines",
+            line=dict(color="rgba(67,67,67,1)", dash=5, width=1)
+        )
+    )
     layout = dict(
         title=title,
         xaxis=dict(title="time (t)"),
         yaxis=dict(title="height (h)")
     )
+    annotations.append(dict(
+        xref='paper',
+        x=-0.05, y=0.25,
+        xanchor='left', yanchor='middle',
+        text="h/2",
+        font=dict(
+            size=14,
+            color="rgba(14,0,179,1)"
+        ),
+        showarrow=False,))
+    annotations.append(dict(
+        xref='paper',
+        x=0.27, y=-0.02,
+        xanchor='left', yanchor='middle',
+        text="t_h/2",
+        font=dict(
+            size=14,
+            color="rgba(14,0,179,1)"
+        ),
+        showarrow=False,))
+    layout['annotations'] = annotations
     py.image.save_as({'data': data, 'layout': layout}, image_name)
     print 'Saved {}'.format(image_name)
 
@@ -83,16 +122,16 @@ if __name__ == '__main__':
     ys, ts = [], []
     for t in np.arange(0, 60, 0.25):
         yt = y(t)
-        if 1e-5 > yt >= -1e-5:
-            break
         ys.append(yt)
         ts.append(t)
-        print "Time: {}, y: {}".format(t, yt)
+        if 1e-5 > yt >= -1e-5:
+            break
+        # print "Time: {}, y: {}".format(t, yt)
 
     print "Time the bath takes to empty is {}".format(t_h())
     print "Time the bath takes to half empty is {}".format(t_h_2())
 
-    y_plot = [('time (t)', ys)]
+    y_plot = [('Water depth', ys)]
 
     # Generate plot for the whole duration of bath emptying
     generate_plotly(
